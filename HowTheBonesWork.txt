@@ -1,0 +1,127 @@
+Here is how the animations work:
+
+See these for more details also
+http://sourceforge.net/projects/assimp/forums/forum/817654/topic/3880745
+http://ogldev.atspace.co.uk/www/tutorial38/tutorial38.html
+
+The model will have a number if key frame "poses" - from when the model is composed (in Blender for example)
+A key frame pose is the rest pose transformed (rotated, scaled, translated) into a new position.
+The transform matrices - usually rotate/translate only, unless the model is also moving - are called "bones".
+Each vertex in the model can be affected by every bone - but it is more usualy that indiviudal bones impact 
+vertices close to that bone.
+Any given vertex may be influenced by several bones ( usually less than some limited - eg 4 or 8 bones)
+We may have one bone that influences ALL vertices - eg to make the entire model move in unision.
+
+The data structures needed:
+-The model is an array vertices of vec4 or vec3.
+-Each model has a rest pose and fixed number of key frame poses 
+
+-There is a fixed number of bones - each bone consisting of a mat4
+-Each bone has a unique int boneID
+-Each bone can influence each vertex by an amount between 0 and 1 (called the boneWeight)
+-Each bone has boneWeight data as follows:
+
+struct bone{
+	int n=mNumWeights;
+	struct {
+		float		mWeight;    // a number between 0 and 1
+		int			mVertexId;
+	}mWeights[mNumWeights];
+}mBones[no_of_bones];
+
+NOTE: The sum of all boneWeights for a given vertex must be 1
+
+To print out the vertices and boneWeights for each bone
+	for (int n=0; n < Mesh->mNumBones; n++ ) {
+		cout << "No of vertices affected by bone: " << n << "is " << Mesh->mBones[n]->mNumWeights << endl;
+
+		cout << "list of vertices and weights for this bone is ..." << endl;
+		for (int w=0; w < Mesh->mBones[n]->mNumWeights; w++ ){
+			cout << "Vertex no: "	<< Mesh->mBones[n]->mWeights[w].mVertexId	<<
+			        "Weight   : "	<< Mesh->mBones[n]->mWeights[w].mWeight		<< endl;
+		}// end for each vertex/weight
+	} // end for for each bone
+
+Now each mesh (assume 1 mesh) has a number of animations (assume 1)
+Each animation has an array of poses - ie Mat4 matrices.
+
+So if we are running the animation the sequence is:
+
+1. Locate the array of transforms (mNumBones in size) that define the pose
+   Note: Rest pose transforms are all identify
+   Note: There is one transform per bone pre animations sequence ( eg run, dance, jump etc)
+
+   mat4 Transforms[mBones];    // fill this in
+
+2. Send this as a uniform variable to the vertex shader.  ie its stays constant the whole drawMesh() invocation.
+
+	uniform mat4 boneTransforms[64];    // assuming 64 is the max number of bones (usually a lot less)
+
+3. For each vertex 
+     locate and store the boneIDs and BoneWeights that affect the vertex
+	 - we use function getBonesAffectingEachVertex() to fill the boneID[] and boneWeight[] arrays - 
+	 int boneID[n];			  // remembering that a bone is the ID of a transform
+	 float boneWeight[n];     // where n is the max number of bones per vertex (scene-start limits to 4)
+	 
+	 If this vertex is not affetced by any bones then make:
+	 boneID[0] to boneID[n] = 0;
+	 boneWeight[0] = 1.0;  and boneWeight[1] to boneWeight[n] = 0.0;
+
+	 Note: The boneIDs and boneWeights are calculated for every vertex before display()
+	       and loaded into the gl buffer.
+		   ie they are NOT calculated per vertex on the fly.....
+
+4. Send the boneIDs and boneWeights to the vertex shader as variable date with the vertices, normals etc
+
+5. In the vertex shader calculate the final transform for that vertex as the 
+   weighted average of each of the bone transforms that affect it.
+
+   // for a system thats limited to 4 bones per vertex ...
+   	mat4 boneTransform = vBoneWeights[0] * boneTransforms[vBoneIDs[0]] +
+                         vBoneWeights[1] * boneTransforms[vBoneIDs[1]] +
+						 vBoneWeights[2] * boneTransforms[vBoneIDs[2]] +
+						 vBoneWeights[3] * boneTransforms[vBoneIDs[3]];
+
+	//Then code like below lines applies the appropriate "distorion" 
+		vec4 PosL			= boneTransform* vec4(vPosition1, 1.0); 	// vertices for lighting
+		vec4 NormalL		= boneTransform* vec4(vNormal  ,  0.0);  	// normals for lighting 
+
+6. Interpolation can also be applied at step 1 that calculates intermediate Transforms between the 
+   key frame poses.
+
+   - we use calculateAnimPose() to generate the intermediate poses (Mat4 transorms per bone) - 
+
+   For example: if the Key Frames were intended to be displayed every 1/10 second
+   Transform[0] is for time t = 0;
+   Transform[1] is for time t = 0.1;
+   Transform[2] is for time t = 0.2;
+   .
+   .
+   Transform[n] is for time t = 0.1*n;
+
+   For time t = 0.15 we can interpolate from Transform[1] to Transform[2] to calculate a new 
+   intermediate transform.
+
+   This way we can increase the number of poses to say 10 times the number if key frame poses, 
+   composed by the artist.
+
+   Thats basicially it .. 
+
+   SUMMARY
+   -A pose is an array of Mat4 transforms - with one transform per bone.
+      - this array is sent to the shader as a Uniform at the start of each display() invocation 
+   -Key Frame poses are generated by the artist using Blender or equivalent.
+   -Intermediate poses are calculated by the the programmer by interpolating between 2 successive key frames
+   -In a given pose - each bone affects (by weight) a number of vertices
+                    - the total weight of all bones on any vertex is 1
+   -Prior to a display() we assemble the boneIDs and boneWeighst for every vertex
+      We pack these into the GL data buffer to be sent with the vertices.
+   -Per vertex in the vertex shader we work out the final transformation for the vertex as the
+    weighted sum of the transformations for each bone.
+
+
+
+
+
+
+

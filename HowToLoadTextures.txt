@@ -1,0 +1,73 @@
+This requires either the bitmaps.c source or the SOIL (Small Open Image Library).
+----------------------------------------------
+Using bitmaps.c and functions in gnatiread.c
+------------------------------------------
+We have an array of texture IDs ( as returned by OpenGL) and an array of texture structures.
+
+texture* textures[numTextures]; // An array of texture pointers - see gnatidread.h
+GLuint textureIDs[numTextures]; // Stores the IDs returned by glGenTextures
+
+During prog initialisation we create a texture object for every potential texture
+glGenTextures(numTextures, textureIDs);          // create texture objects
+
+typedef struct {
+    int height;
+    int width;
+    GLubyte *rgbData;   // Array of bytes with the colour data for the texture
+} texture;
+
+1. texture* loadTextureNum(int NUM)
+   This just calls
+   texture* loadTexture(char *fileName) // where filename is "textureNUM.bmp" 
+   The function:
+      mallocs memory for the file and stores it at textures[NUM].rgbdata (via LoadDIBitmap() from bitmap.c)
+      Loads the file size into textures[NUM].height and textures[NUM].width
+
+   Up to this openGL is not involved.
+
+2. Then we do this...
+    glActiveTexture(GL_TEXTURE0);                    // select the texture unit (always GL_TEXTURE0)
+    glBindTexture(GL_TEXTURE_2D, textureIDs[i]);     // Bind the previosly created texture object
+	// Load the image data into the bound texture object
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textures[i]->width, textures[i]->height,
+                 0, GL_RGB, GL_UNSIGNED_BYTE, textures[i]->rgbData); 
+    glGenerateMipmap(GL_TEXTURE_2D);				// generate mipmaps for the bound texture object
+	// set the sampler parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); 
+
+    glBindTexture(GL_TEXTURE_2D, 0);				// Unbind the object
+
+3. After that we just have to bond the required texture object prior to drawings
+    glActiveTexture(GL_TEXTURE0);                    // select the texture unit (always GL_TEXTURE0) - may not be needed
+    glBindTexture(GL_TEXTURE_2D, textureIDs[i]);     // Bind any one of the previosly created texture objects
+
+4. We also need to set the Uniform variable in the shader to sampler 0
+   glUniform1i( glGetUniformLocation(shaderProgram, "texture"), 0 );
+
+-----------------------------------------
+   Using SOIL (Small Open Image Library).
+------------------------------------------
+The easiest way to create a texture is with the SOIL_load_OGL_texture() function
+unsigned int										// returns 0 (fail) or texture_ID if successful
+	SOIL_load_OGL_texture
+	(
+		const char *filename,
+		int force_channels,                        // normally set to SOIL_LOAD_AUTO
+		unsigned int reuse_texture_ID,			   // SOIL_CREATE_NEW_ID (==0) or if > 0, use that texture_id
+		unsigned int flags						   // 0 if no flags ( otherwise see list in SOIL.h)
+	);
+
+GLuint ID = SOIL_load_OGL_texture( filename, SOIL_LOAD_AUTO, textureID, 0 );
+will load texture object textureID and NOT create a mip map.
+
+GLuint textureID = SOIL_load_OGL_texture( filename, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS );
+will create a new texture object and load it and will also create a mip map.
+
+The objective for scene-start is to end up with GLuint textureIDs[numTextures] full of either real textureIDs
+or teh value NOT_LOADED. eg #define NOT_LOADED 9999999.
+
+texture* textures[numTextures];  is not needed anymore 
+

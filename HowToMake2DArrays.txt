@@ -1,0 +1,52 @@
+	/* FIRST HERE IS HOW TO DO IT WITH new and delete;
+	How to create a one dimensional variable length array
+	1. int * arrayofints = new int[no_of_rows];
+	   // Then you can access each element as if declared 
+	   int arrayofints[no_of_rows];   // since arrayofints is a pointer to an array of ints
+
+	2. When done you must free the memory as below
+	   delete [] arrayofints;
+
+    How to create a 2 dimensional variable length array (method 1)
+	(actual array data will most likely NOT be contiguous)
+	1. int ** arrayofints = new int * [no_of_rows];     // an array of pointers to arrays of ints
+	   for (int i = 0; i < no_of_rows; i++)
+			arrayofints[i] = new int * [no_of_cols]; // arrayofints[i] is a pointer to an array of ints
+		// Then you can access each element as if declared
+		int arrayofints[no_of_rows][no_of_cols];   // since arrayofints is a pointer to an array of ints
+
+	2. When done you must free the memory as below
+	   for (int i=0, i < no_of_rows; i++) delete [] arrayofints[i];
+	   delete [] arrayofints;
+
+    How to create a 2 dimensional variable length array (method 2)
+	(actual array data WILL BE contiguous)
+	1. int ** arrayofints_ptrs = new int * [no_of_rows];			// same as method 1.
+	   int *  arrayofints = new int [no_of_rows * no_of_cols];		// all data is contiguous
+	   for (int i = 0; i < no_of_rows; i++)
+			arrayofints_ptrs[i] = &arrayofints[i*no_of_cols]; // all ptrs now point to start of a row of data
+       // We can now access the data either as rows of columns as
+	        int x = arrayofints_ptrs[row][col];
+       // or 
+	        int x = arrayofints[row*col]; 
+	   // you can now also pass the data as func_name(int *arrayofints)
+	   // which is a MUST for openGL
+
+	2. When done you must free the memory as below
+	   delete [] arrayofints;
+	   delete [] arrayofints_ptrs;
+	*/
+
+	/*NOW HERE IS HOW TO DO IT WITH std<vector>
+	How to create a one dimensional variable length array
+	1.  Declare a vector as follows:
+		#include <vector> // needed at start of any module using vectors
+
+		std::vector<int> arrayofints(arraysize);   // where arraysize is an int variable
+		// Then you can access the array like;
+		int x = arrayofints[5] + arrayofints[7];  // for example
+
+		The vector class allocates the memory and free it automatically when goes out of scope.
+
+	How to create a 2 dimensional variable length array (method 1)
+	1.  

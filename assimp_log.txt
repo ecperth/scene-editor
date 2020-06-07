@@ -1,0 +1,28 @@
+Info,  T9048: Load C:\MSProjects\models-textures/model0.x
+Info,  T9048: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T9048: Import root directory is 'C:\MSProjects\models-textures\'
+Info,  T9048: Entering post processing pipeline
+Info,  T9048: TriangulateProcess finished. All polygons have been triangulated.
+Info,  T9048: Points: 0, Lines: 0, Triangles: 1, Polygons: 0 (Meshes, X = removed)
+Info,  T9048: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9048: JoinVerticesProcess finished | Verts in: 324 out: 100 | ~69.1%
+Info,  T9048: Cache relevant are 1 meshes (162 faces). Average output ACMR is 0.820988
+Info,  T9048: Leaving post processing pipeline
+Info,  T9048: Load C:\MSProjects\models-textures/model55.x
+Info,  T9048: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T9048: Import root directory is 'C:\MSProjects\models-textures\'
+Info,  T9048: Entering post processing pipeline
+Info,  T9048: Points: 0, Lines: 0, Triangles: 1, Polygons: 0 (Meshes, X = removed)
+Info,  T9048: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9048: JoinVerticesProcess finished | Verts in: 240 out: 76 | ~68.3%
+Info,  T9048: Cache relevant are 1 meshes (80 faces). Average output ACMR is 0.950000
+Info,  T9048: Leaving post processing pipeline
+Info,  T9048: Load C:\MSProjects\models-textures/model2.x
+Info,  T9048: Found a matching importer for this file format: Direct3D XFile Importer.
+Info,  T9048: Import root directory is 'C:\MSProjects\models-textures\'
+Info,  T9048: Entering post processing pipeline
+Info,  T9048: Points: 0, Lines: 0, Triangles: 1, Polygons: 0 (Meshes, X = removed)
+Info,  T9048: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9048: JoinVerticesProcess finished | Verts in: 17400 out: 5547 | ~68.1%
+Info,  T9048: Cache relevant are 1 meshes (5800 faces). Average output ACMR is 1.061724
+Info,  T9048: Leaving post processing pipeline

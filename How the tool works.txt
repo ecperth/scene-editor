@@ -1,0 +1,12 @@
+//*BC* This decribes how the "tool" works 
+	// The tool allows different things to happen in response to mouse presses and movements
+	// When a mouse key is pressed mouseClickOrScroll() activates tool and deactivated when released
+	// Activation is established by making currButton (defined in gnatiread.h) to LEFT_BUTTON or RIGHT_BUTTON (-1 is inactive)
+	// When activated doToolUpdateXY() calls the tool leftCallback() or middCallback() (right is for the menu only)
+	// doToolUpdateXY() also updates the prevPos and curPos variables
+	// leftCallback() and middCallback() are function pointers that are initially set to doNothingCallback()
+	// The tool callback is changed via the menu - so that mouse can be used for different functions
+	// Menu actions call setToolCallbacks() to change the leftCallback() and middCallback() to do different things
+	// For example the menu action for "Rotate/Move Camera" (menu id 50) sets the leftCallback() to adjustCamrotsideViewdist()
+	// and middCallback() to adjustcamSideUp()
+	// init() - called by main() calls setToolCallbacks() via doRotate() to make the camera the active tool object.

@@ -1,0 +1,40 @@
+change all printfs to cout and cerr as appropriate
+change all getchars to cin or equivalent
+Fix the texture menu ( extra submenu)					- done
+Fix the animation parts							- done
+Refactor into c++ objects as far as possible
+Get rid of linker error LIBCMT
+Get rid of the truncation warnings - double to float
+Use quaternions for object rotations
+Integrate camera class that was downloaded
+Change texture loading to SOIL						- Done ( however may change again to freeImage - more recent support)
+Change texture loading to freeImage
+Make lights look like lights - not spheres
+change the free - delete statements to vector          			- Done for menus. Problems with GL types 
+Make a nicer walk trajectory/speed for the animated objects
+
+Problems during port to VS, GLM and SOIL that were slow/hard to diagnose:
+1) Change from angle.h which uses row order matrices to GLM which uses colomn order
+   - Remembering that GL uses column order internally
+   - had to change the GL_TRUE ( transpose) to GL_FALSE (no transpose) when send matrices to the shader
+   - eg glUniformMatrix4fv(uProjection, 1, GL_FALSE, glm::value_ptr(projection));
+
+2) Assimp also uses row order - ie loads the animation matrices into mesh as row order
+   - SO had to manually transpose in calculateAnimPose() at exit so output matrices are correctly ordered
+
+3) Soil uses deprecated GL functions and crashes silectly ( seg error) if you don't issue
+   glutInitContextProfile( GLUT_COMPATIBILITY_PROFILE)
+
+   The culprit is 
+   glGetString( GL_EXTENSIONS ) which is deprecated
+   glGetString() is not deprecated, only the GL_EXTENSIONS argument to it is.
+
+   Re: GL_EXTENSIONS replacement
+	GLint n, i;
+	glGetIntegerv(GL_NUM_EXTENSIONS, &n);
+	for (i = 0; i < n; i++) {
+		printf("%s\n", glGetStringi(GL_EXTENSIONS, i);
+	}
+
+	
+
